@@ -14,9 +14,6 @@ PORT ?= 8000
 start:
 	uv run gunicorn -w 5 -b 0.0.0.0:${PORT} page_analyzer:app
 
-render-start:
-	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
-
 test:
 	uv run pytest
 
@@ -25,4 +22,4 @@ test-coverage:
 
 check: test lint
 
-.PHONY: install lint dev test test-coverage check
+.PHONY: install build lint dev start test test-coverage check
