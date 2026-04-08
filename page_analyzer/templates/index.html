@@ -1,13 +1,23 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+        <div>{{ message }}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12 col-md-10 col-lg-8">
         <div class="p-5 my-4 bg-light border rounded-3 shadow-sm">
           <h1 class="display-4 fw-normal">Анализатор страниц</h1>
           <p class="lead">Бесплатно проверяйте сайты на SEO-пригодность</p>
-          <form method="POST">
+          <form method="POST" action="{{ url_for('create_url') }}">
 <!--            csrf_token()-->
             <div class="input-group mb-3">
               <label for="url" class="visually-hidden">URL</label>
