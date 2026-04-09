@@ -1,8 +1,10 @@
+from datetime import datetime
 import logging
 import os
 from contextlib import contextmanager
+from typing import NamedTuple
+from urllib.parse import urlparse
 
-import psycopg2
 import validators
 from dotenv import load_dotenv
 from flask import (
@@ -38,6 +40,11 @@ pool = SimpleConnectionPool(
 )
 
 
+class URL(NamedTuple):
+    id: int
+    name: str
+
+
 @contextmanager
 def get_connection():
     conn = pool.getconn()
@@ -59,6 +66,7 @@ def index():
 @app.post("/urls")
 def create_url():
     url = request.form.get("url", "")
+    logger.debug("Received URL: %s", url)
 
     if errors := validate(url):
         logger.debug("Validation errors: %s", errors)
@@ -68,12 +76,15 @@ def create_url():
             errors=errors,
         ), 422
 
+    normalized_url = normalize_url(url)
+    logger.debug("Normalized URL: %s", normalized_url)
+
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO urls (url) VALUES (%s)",
-                    (url,),
+                    "INSERT INTO urls (name) VALUES (%s)",
+                    (normalized_url,),
                 )
             conn.commit()
 
@@ -88,8 +99,21 @@ def create_url():
         return redirect(url_for("index"))
 
     flash("Ссылка успешно добавлена", "success")
+    logger.debug("URL successfully inserted into database")
 
     return redirect(url_for("index"), code=303)
+
+
+@app.get("/urls")
+def get_urls():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, name FROM urls")
+            urls = cur.fetchall()
+
+    urls = [URL(*url) for url in urls]
+    logger.debug("Fetched URLs: %s", urls)
+    return render_template("urls.html", urls=urls)
 
 
 def validate(url: str) -> dict[str, list[str]]:
@@ -101,3 +125,9 @@ def validate(url: str) -> dict[str, list[str]]:
             f"Ссылка не должна превышать {MAX_URL_LENGTH} символов"
         )
     return errors
+
+
+def normalize_url(raw_url: str) -> str:
+    parsed = urlparse(raw_url)
+    normalized = f"{parsed.scheme}://{parsed.netloc}"
+    return normalized.lower()
