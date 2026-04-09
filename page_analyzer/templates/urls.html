@@ -4,23 +4,23 @@
   <div class="container">
     <h1 class="mt-3">Сайты</h1>
     <table class="table table-bordered my-3" data-test="urls">
-      <thead>
+      <tbody>
         <tr>
           <th scope="col" class="fw-normal">ID</th>
           <th scope="col" class="fw-normal">Имя</th>
           <th scope="col" class="fw-normal">Последняя проверка</th>
           <th scope="col" class="fw-normal">Код ответа</th>
         </tr>
-      </thead>
-      <tbody>
+        
         {% for url in urls %}
           <tr>
-            <th scope="row" class="fw-normal">{{ url.id }}</th>
-            <td>{{ url.name }}</td>
+            <td scope="row">{{ url.id }}</td>
+            <td><a href="{{ url_for('get_url', url_id=url.id) }}">{{ url.name }}</a></td>
             <td></td>
             <td></td>
           </tr>
         {% endfor %}
+      
       </tbody>
     </table>
   </div>

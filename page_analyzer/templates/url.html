@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="my-3">
+      <h1>Сайт: {{ url.name }}</h1>
+      <table class="table table-bordered mt-3" data-test="url">
+        <tbody>
+          <tr>
+            <th scope="row" class="fw-normal">ID</th>
+            <td>{{ url.id }}</td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" class="fw-normal">Имя</th>
+            <td>{{ url.name }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-normal">Дата создания</th>
+            <td>{{ url.created_at.strftime("%Y-%m-%d") }}</td>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="mt-5 mb-3">
+      <h2>Проверки</h2>
+      <form method="POST" action="#" class="mt-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">Запустить проверку</button>
+      </form>
+      
+      <table class="table table-bordered my-3">
+        <tbody>
+          <tr>
+            <th scope="col" class="fw-normal">ID</th>
+            <th scope="col" class="fw-normal">Код ответа</th>
+            <th scope="col" class="fw-normal">h1</th>
+            <th scope="col" class="fw-normal">title</th>
+            <th scope="col" class="fw-normal">description</th>
+            <th scope="col" class="fw-normal">Дата создания</th>
+          </tr>
+        
+          <!-- table rows go here -->
+        
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
