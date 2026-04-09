@@ -1,16 +1,6 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible" role="alert">
-        <div>{{ message }}</div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12 col-md-10 col-lg-8">
@@ -18,17 +8,28 @@
           <h1 class="display-4 fw-normal">Анализатор страниц</h1>
           <p class="lead">Бесплатно проверяйте сайты на SEO-пригодность</p>
           <form method="POST" action="{{ url_for('create_url') }}">
-<!--            csrf_token()-->
-            <div class="input-group mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
               <label for="url" class="visually-hidden">URL</label>
-              <input type="url"
-                     id="url"
-                     name="url"
-                     class="form-control rounded-3"
-                     placeholder="https://example.com"
-                     required
-              >
-              <button type="submit" class="btn btn-primary ms-2 py-2 px-4 rounded-3">Проверить</button>
+              <div class="input-group">
+                <input id="url"
+                       type="url"
+                       name="url"
+                       value="{{ url or '' }}"
+                       aria-describedby="url-errors"
+                       class="form-control rounded-3 {% if errors and 'url' in errors %}is-invalid{% endif %}"
+                       placeholder="https://example.com"
+                       required
+                >
+                <button type="submit" class="btn btn-primary ms-2 py-2 px-4 rounded-3">Проверить</button>
+              </div>
+              {% if errors and "url" in errors %}
+                <div id="url-errors" class="invalid-feedback d-block mt-2">
+                  {% for error in errors.url %}
+                    <div>{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
             </div>
           </form>
         </div>

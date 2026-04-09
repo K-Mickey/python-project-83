@@ -30,6 +30,16 @@
     </header>
     
     <main class="flex-grow-1">
+      
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      
       {% block content %}{% endblock %}
     </main>
     
