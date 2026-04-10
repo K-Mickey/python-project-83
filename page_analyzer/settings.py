@@ -7,7 +7,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "secret_key")
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = os.getenv("DATABASE_URL")
 DATABASE_MIN_CONN = int(os.getenv("DATABASE_MIN_CONN", "1"))
 DATABASE_MAX_CONN = int(os.getenv("DATABASE_MAX_CONN", "10"))
 
