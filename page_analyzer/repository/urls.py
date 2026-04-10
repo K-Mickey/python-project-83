@@ -1,27 +1,7 @@
-from contextlib import contextmanager
 from datetime import datetime
 from typing import Protocol
 
 from psycopg2.extras import NamedTupleCursor
-from psycopg2.pool import ThreadedConnectionPool
-
-from page_analyzer import settings
-
-pool = ThreadedConnectionPool(
-    minconn=settings.DATABASE_MIN_CONN,
-    maxconn=settings.DATABASE_MAX_CONN,
-    dsn=settings.DATABASE_URL,
-)
-
-
-@contextmanager
-def get_connection():
-    conn = pool.getconn()
-    try:
-        yield conn
-    finally:
-        conn.rollback()
-        pool.putconn(conn)
 
 
 class URL(Protocol):
@@ -41,10 +21,7 @@ class URLRepository:
                 "RETURNING id, name, created_at",
                 (name,),
             )
-            url = cur.fetchone()
-
-        self.connection.commit()
-        return url
+            return cur.fetchone()
 
     def get(self) -> list[URL]:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
@@ -53,8 +30,7 @@ class URLRepository:
             FROM urls 
             ORDER BY created_at DESC
             """)
-            urls = cur.fetchall()
-        return urls
+            return cur.fetchall()
 
     def get_by_id(self, url_id: int) -> URL | None:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
