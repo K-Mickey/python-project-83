@@ -66,3 +66,28 @@ def test_normalization(client):
     response = client.get("/urls")
     assert "https://example.com" in response.text
     assert "/any/path" not in response.text
+
+
+def test_create_check_success(client):
+    post_resp = client.post("/urls", data={"url": "https://example.com"})
+    location = post_resp.headers["Location"]
+    url_id = location.split("/")[-1]
+
+    response = client.post(f"/urls/{url_id}/checks", follow_redirects=False)
+
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.headers["Location"] == f"/urls/{url_id}"
+
+    follow_response = client.get(response.headers["Location"])
+    assert FlashCategory.SUCCESS.value in follow_response.text
+    assert "Страница успешно проверена" in follow_response.text
+
+
+def test_create_check_nonexistent_url(client):
+    response = client.post("/urls/99999/checks", follow_redirects=False)
+
+    assert response.headers["Location"] == "/urls"
+    follow_response = client.get(response.headers["Location"])
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_CONTENT
+    assert FlashCategory.DANGER.value in follow_response.text
+    assert "Страница не найдена" in follow_response.text
