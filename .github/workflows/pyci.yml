@@ -44,6 +44,8 @@ jobs:
       - name: Run test coverage
         run: |
           make test-coverage
+        env:
+          TEST_BASE_DB_URL: postgres://admin:admin@localhost:5432/test
 
       - name: SonarQubeScan
         uses: SonarSource/sonarqube-scan-action@v7
