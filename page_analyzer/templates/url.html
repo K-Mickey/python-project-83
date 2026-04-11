@@ -23,12 +23,12 @@
     
     <div class="mt-5 mb-3">
       <h2>Проверки</h2>
-      <form method="POST" action="#" class="mt-4">
+      <form method="POST" action="{{ url_for('urls.create_check', url_id=url.id) }}" class="mt-4">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-primary">Запустить проверку</button>
       </form>
       
-      <table class="table table-bordered my-3">
+      <table class="table table-bordered my-3" data-test="checks">
         <tbody>
           <tr>
             <th scope="col" class="fw-normal">ID</th>
@@ -39,7 +39,16 @@
             <th scope="col" class="fw-normal">Дата создания</th>
           </tr>
         
-          <!-- table rows go here -->
+          {% for check in checks %}
+            <tr>
+              <td scope="row">{{ check.id }}</td>
+              <td>{{ check.status_code }}</td>
+              <td>{{ check.h1 }}</td>
+              <td>{{ check.title }}</td>
+              <td>{{ check.description }}</td>
+              <td>{{ check.created_at.strftime("%Y-%m-%d") }}</td>
+            </tr>
+          {% endfor %}
         
         </tbody>
       </table>
