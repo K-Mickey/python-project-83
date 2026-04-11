@@ -10,6 +10,11 @@ class URL(Protocol):
     created_at: datetime
 
 
+class URLCheck(URL):
+    last_check_created_at: datetime | None
+    last_check_status_code: int | None
+
+
 class URLRepository:
     def __init__(self, connection):
         self.connection = connection
@@ -23,12 +28,22 @@ class URLRepository:
             )
             return cur.fetchone()
 
-    def get(self) -> list[URL]:
+    def get_all_with_last_checks(self) -> list[URLCheck]:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute("""
-            SELECT id, name, created_at 
-            FROM urls 
-            ORDER BY created_at DESC
+                SELECT 
+                    urls.id,
+                    urls.name,
+                    urls.created_at,
+                    checks.created_at as last_check_created_at,
+                    checks.status_code as last_check_status_code
+                FROM urls
+                LEFT JOIN (
+                    SELECT DISTINCT ON (url_id) url_id, created_at, status_code
+                    FROM url_checks
+                    ORDER BY url_id, created_at DESC
+                ) checks ON urls.id = checks.url_id
+                ORDER BY urls.created_at DESC
             """)
             return cur.fetchall()
 
