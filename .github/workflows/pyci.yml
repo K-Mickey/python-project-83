@@ -7,6 +7,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python
@@ -22,6 +38,8 @@ jobs:
       - name: Run linter and Pytest
         run: |
           make check
+        env:
+          TEST_BASE_DB_URL: postgres://admin:admin@localhost:5432/test
 
       - name: Run test coverage
         run: |

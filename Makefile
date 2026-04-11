@@ -13,7 +13,7 @@ lint:
 	uv run ruff check page_analyzer --fix
 
 dev:
-	uv run flask --debug --app page_analyzer:app run
+	uv run flask --debug --app "page_analyzer:create_app()" run
 
 PORT ?= 8000
 start:

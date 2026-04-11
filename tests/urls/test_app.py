@@ -1,0 +1,68 @@
+from http import HTTPStatus
+
+from page_analyzer.utils.flash import FlashCategory
+
+
+def test_index_page(client):
+    response = client.get("/")
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_create_url_success(client):
+    response = client.post(
+        "/urls", data={"url": "https://example.com"}, follow_redirects=False
+    )
+    assert response.status_code == HTTPStatus.FOUND
+    assert "/urls/" in response.headers["Location"]
+    response_follow = client.get(response.headers["Location"])
+    assert FlashCategory.SUCCESS.value in response_follow.text
+
+
+def test_create_url_validation_error(client):
+    response = client.post("/urls", data={"url": "not_a_url"})
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_CONTENT
+    assert "Некорректный URL" in response.text
+    response_all = client.get("/urls")
+    assert "not_a_url" not in response_all.text
+
+
+def test_create_url_duplicate(client):
+    client.post("/urls", data={"url": "https://duplicate.com"})
+    response = client.post(
+        "/urls", data={"url": "https://duplicate.com"}, follow_redirects=False
+    )
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.headers["Location"] == "/"
+    response_follow = client.get("/")
+    assert FlashCategory.DANGER.value in response_follow.text
+    assert "Страница уже существует" in response_follow.text
+
+
+def test_get_urls_empty(client):
+    response = client.get("/urls")
+    assert response.status_code == HTTPStatus.OK
+    assert "<table" in response.text
+
+
+def test_get_urls_with_data(client):
+    client.post("/urls", data={"url": "https://first.com"})
+    client.post("/urls", data={"url": "https://second.com"})
+    response = client.get("/urls")
+    assert "first.com" in response.text
+    assert "second.com" in response.text
+
+
+def test_get_existing_url(client):
+    post_resp = client.post("/urls", data={"url": "https://detail.com"})
+    location = post_resp.headers["Location"]
+    url_id = location.split("/")[-1]
+    response = client.get(f"/urls/{url_id}")
+    assert response.status_code == HTTPStatus.OK
+    assert "detail.com" in response.text
+
+
+def test_normalization(client):
+    client.post("/urls", data={"url": "HTTPS://Example.COM/any/path?q=1"})
+    response = client.get("/urls")
+    assert "https://example.com" in response.text
+    assert "/any/path" not in response.text
