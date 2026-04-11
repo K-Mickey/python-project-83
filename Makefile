@@ -4,7 +4,7 @@ ifneq (,$(wildcard .env))
 endif
 
 install:
-	uv sync
+	uv sync --frozen && uv cache prune --ci
 
 build:
 	./build.sh
