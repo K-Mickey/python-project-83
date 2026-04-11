@@ -13,6 +13,7 @@ from flask import (
 from psycopg2.errors import UniqueViolation
 
 from page_analyzer.repository import CheckRepository, URLRepository
+from page_analyzer.utils.checks import check_url
 from page_analyzer.utils.flash import FlashCategory
 from page_analyzer.utils.urls import normalize_url, validate
 
@@ -101,7 +102,8 @@ def get_url(url_id: int):
 def create_check(url_id: int):
     try:
         with current_app.database.transaction() as conn:
-            if not URLRepository(conn).get_by_id(url_id):
+            url = URLRepository(conn).get_by_id(url_id)
+            if not url:
                 logger.debug("URL not found")
                 flash("Страница не найдена", FlashCategory.DANGER)
                 return redirect(
@@ -109,8 +111,14 @@ def create_check(url_id: int):
                     code=HTTPStatus.UNPROCESSABLE_CONTENT,
                 )
 
+        status_code = check_url(url.name)
+
+        with current_app.database.transaction() as conn:
             repository = CheckRepository(conn)
-            check = repository.create(url_id)
+            check = repository.create(
+                url_id=url_id,
+                status_code=status_code,
+            )
 
             logger.debug("Created check: %s", check)
             flash("Страница успешно проверена", FlashCategory.SUCCESS)

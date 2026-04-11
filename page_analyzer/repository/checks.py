@@ -18,15 +18,19 @@ class CheckRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, url_id: int) -> Check:
+    def create(
+        self,
+        url_id: int,
+        status_code: int,
+    ) -> Check:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute(
                 """
-                INSERT INTO url_checks (url_id)
-                VALUES (%s)
+                INSERT INTO url_checks (url_id, status_code)
+                VALUES (%s, %s)
                 RETURNING *
             """
-                % url_id
+                % (url_id, status_code)
             )
             return cur.fetchone()
 

@@ -11,6 +11,7 @@ dependencies = [
     "gunicorn>=25.3.0",
     "psycopg2-binary>=2.9.11",
     "python-dotenv>=1.2.2",
+    "requests>=2.33.1",
     "validators>=0.35.0",
 ]
 
@@ -18,5 +19,6 @@ dependencies = [
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
     "ruff>=0.15.9",
 ]
