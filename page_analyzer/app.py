@@ -5,7 +5,7 @@ from flask_wtf import CSRFProtect
 
 from page_analyzer import settings
 from page_analyzer.repository import Database
-from page_analyzer.routers import urls_bp
+from page_analyzer.views import bp
 
 
 def create_app(
@@ -35,6 +35,6 @@ def create_app(
 
     app.database = database
 
-    app.register_blueprint(urls_bp)
+    app.register_blueprint(bp)
 
     return app

@@ -12,8 +12,8 @@ from flask import (
 )
 from psycopg2.errors import UniqueViolation
 
-from page_analyzer.repository import CheckRepository, URLRepository
-from page_analyzer.utils.checks import check_url
+from page_analyzer.repository import CheckRepository, UrlRepository
+from page_analyzer.utils.checks import check_url, sanitize_url_info
 from page_analyzer.utils.flash import FlashCategory
 from page_analyzer.utils.urls import normalize_url, validate
 
@@ -48,7 +48,7 @@ def create_url():
 
     try:
         with current_app.database.transaction() as conn:
-            url_repository = URLRepository(conn)
+            url_repository = UrlRepository(conn)
             url = url_repository.create(normalized_url)
 
         logger.debug("URL successfully inserted into database %s", url)
@@ -73,7 +73,7 @@ def create_url():
 @bp.get("/urls")
 def get_urls():
     with current_app.database.transaction() as conn:
-        urls = URLRepository(conn).get_all_with_last_checks()
+        urls = UrlRepository(conn).get_all_with_last_checks()
 
     logger.debug("Fetched URLs: %s", urls)
     return render_template("urls.html", urls=urls)
@@ -82,7 +82,7 @@ def get_urls():
 @bp.get("/urls/<int:url_id>")
 def get_url(url_id: int):
     with current_app.database.transaction() as conn:
-        url = URLRepository(conn).get_by_id(url_id)
+        url = UrlRepository(conn).get_by_id(url_id)
         checks = CheckRepository(conn).get_checks_by_url(url_id)
 
     if not url:
@@ -102,7 +102,7 @@ def get_url(url_id: int):
 def create_check(url_id: int):
     try:
         with current_app.database.transaction() as conn:
-            url = URLRepository(conn).get_by_id(url_id)
+            url = UrlRepository(conn).get_by_id(url_id)
             if not url:
                 logger.debug("URL not found")
                 flash("Страница не найдена", FlashCategory.DANGER)
@@ -112,14 +112,7 @@ def create_check(url_id: int):
                 )
 
         url_info = check_url(url.name)
-        if url_info.h1:
-            url_info.h1 = url_info.h1[:200] + "..." if len(url_info.h1) > 200 else url_info.h1
-
-        if url_info.title:
-            url_info.title = url_info.title[:200] + "..." if len(url_info.title) > 200 else url_info.title
-
-        if url_info.description:
-            url_info.description = url_info.description[:200] + "..." if len(url_info.description) > 200 else url_info.description
+        url_info = sanitize_url_info(url_info)
 
         with current_app.database.transaction() as conn:
             repository = CheckRepository(conn)

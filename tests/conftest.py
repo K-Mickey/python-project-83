@@ -45,7 +45,7 @@ def connection(database):
 
     yield db
 
-    db.close()
+    db.close_all()
 
     with psycopg2.connect(dsn) as conn:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)

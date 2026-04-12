@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
+from psycopg2._psycopg import connection as PsycopgConnection
 from psycopg2.extras import NamedTupleCursor
 
 
@@ -15,7 +16,7 @@ class Check(Protocol):
 
 
 class CheckRepository:
-    def __init__(self, connection):
+    def __init__(self, connection: PsycopgConnection):
         self.connection = connection
 
     def create(
@@ -35,7 +36,7 @@ class CheckRepository:
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING *
             """,
-               (url_id, status_code, h1, title, description)
+                (url_id, status_code, h1, title, description),
             )
             return cur.fetchone()
 
@@ -47,6 +48,7 @@ class CheckRepository:
                 FROM url_checks
                 WHERE url_id = %s
                 ORDER BY created_at DESC
-            """, (url_id,)
+            """,
+                (url_id,),
             )
             return cur.fetchall()

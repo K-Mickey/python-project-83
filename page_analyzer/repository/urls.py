@@ -1,25 +1,26 @@
 from datetime import datetime
 from typing import Protocol
 
+from psycopg2._psycopg import connection as PsycopgConnection
 from psycopg2.extras import NamedTupleCursor
 
 
-class URL(Protocol):
+class Url(Protocol):
     id: int
     name: str
     created_at: datetime
 
 
-class URLCheck(URL):
+class UrlLastCheck(Url):
     last_check_created_at: datetime | None
     last_check_status_code: int | None
 
 
-class URLRepository:
-    def __init__(self, connection):
+class UrlRepository:
+    def __init__(self, connection: PsycopgConnection):
         self.connection = connection
 
-    def create(self, name: str) -> URL:
+    def create(self, name: str) -> Url:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute(
                 "INSERT INTO urls (name) VALUES (%s) "
@@ -28,7 +29,7 @@ class URLRepository:
             )
             return cur.fetchone()
 
-    def get_all_with_last_checks(self) -> list[URLCheck]:
+    def get_all_with_last_checks(self) -> list[UrlLastCheck]:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute("""
                 SELECT 
@@ -47,7 +48,7 @@ class URLRepository:
             """)
             return cur.fetchall()
 
-    def get_by_id(self, url_id: int) -> URL | None:
+    def get_by_id(self, url_id: int) -> Url | None:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute(
                 "SELECT id, name, created_at FROM urls WHERE id = %s",
