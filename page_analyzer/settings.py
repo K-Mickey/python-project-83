@@ -21,6 +21,7 @@ LOG_FORMAT = os.getenv(
     "> %(message)s",
 )
 
+TESTING = os.getenv("TESTING", False)
 TEST_DB_URL = os.getenv(
     "TEST_BASE_DB_URL", "postgresql://postgres:postgres@localhost:5432/test"
 )

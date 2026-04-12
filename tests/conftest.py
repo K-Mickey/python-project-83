@@ -2,7 +2,7 @@ import psycopg2
 import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from page_analyzer import create_app
+from page_analyzer import create_app, settings
 from page_analyzer.repository import Database
 from page_analyzer.settings import (
     DATABASE_MAX_CONN,
@@ -12,6 +12,8 @@ from page_analyzer.settings import (
     TEST_DB_NAME,
     TEST_DB_URL,
 )
+
+settings.TESTING = True
 
 
 @pytest.fixture(scope="session")
