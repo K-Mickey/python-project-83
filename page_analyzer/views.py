@@ -10,7 +10,6 @@ from flask import (
     request,
     url_for,
 )
-from psycopg2.errors import UniqueViolation
 
 from page_analyzer.repository import CheckRepository, UrlRepository
 from page_analyzer.utils.checks import check_url, sanitize_url_info
@@ -48,16 +47,17 @@ def create_url():
 
     try:
         with current_app.database.transaction() as conn:
-            url_repository = UrlRepository(conn)
-            url = url_repository.create(normalized_url)
+            repository = UrlRepository(conn)
 
-        logger.debug("URL successfully inserted into database %s", url)
+            if exist_url := repository.get_by_name(normalized_url):
+                logger.debug("URL already exists")
+                flash("Страница уже существует", FlashCategory.DANGER)
+                return redirect(url_for("urls.get_url", url_id=exist_url.id))
+
+            new_url = repository.create(normalized_url)
+
+        logger.debug("URL successfully inserted into database %s", new_url)
         flash("Страница успешно добавлена", FlashCategory.SUCCESS)
-
-    except UniqueViolation:
-        logger.debug("URL already exists")
-        flash("Страница уже существует", FlashCategory.DANGER)
-        return redirect(url_for("urls.index"))
 
     except Exception as e:
         logger.error("Error during URL insertion: %s", e)
@@ -65,7 +65,7 @@ def create_url():
         return redirect(url_for("urls.index"))
 
     return redirect(
-        url_for("urls.get_url", url_id=url.id),
+        url_for("urls.get_url", url_id=new_url.id),
         code=HTTPStatus.FOUND,
     )
 

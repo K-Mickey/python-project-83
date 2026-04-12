@@ -55,3 +55,11 @@ class UrlRepository:
                 (url_id,),
             )
             return cur.fetchone()
+
+    def get_by_name(self, name: str) -> Url | None:
+        with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
+            cur.execute(
+                "SELECT id, name, created_at FROM urls WHERE name = %s",
+                (name,),
+            )
+            return cur.fetchone()

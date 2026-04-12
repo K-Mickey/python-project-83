@@ -43,9 +43,10 @@ def test_create_url_duplicate(client):
     response = client.post(
         "/urls", data={"url": "https://duplicate.com"}, follow_redirects=False
     )
-    assert response.headers["Location"] == "/"
-    response_follow = client.get("/")
+    assert "/urls/" in response.headers["Location"]
+    response_follow = client.get(response.headers["Location"])
     assert "Страница уже существует" in response_follow.text
+    assert 'data-test="url"' in response_follow.text
 
 
 def test_get_urls_empty(client, connection):
