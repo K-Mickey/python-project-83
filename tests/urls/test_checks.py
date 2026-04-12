@@ -32,6 +32,29 @@ def test_check_url_success():
     mock_response.raise_for_status.assert_called_once()
 
 
+def test_check_url_success_2():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = """
+        <html>
+            <body>
+                <p>Some content</p>
+            </body>
+        </html>
+        """
+    mock_response.raise_for_status.return_value = None
+
+    with patch("requests.get", return_value=mock_response) as mock_get:
+        check = check_url("https://example.com")
+
+    assert check.status_code == 200
+    assert check.h1 is None
+    assert check.title is None
+    assert check.description is None
+    mock_get.assert_called_once_with("https://example.com")
+    mock_response.raise_for_status.assert_called_once()
+
+
 def test_check_url_http_error():
     mock_response = Mock()
     mock_response.status_code = 404
