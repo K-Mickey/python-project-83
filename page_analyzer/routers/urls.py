@@ -111,13 +111,24 @@ def create_check(url_id: int):
                     code=HTTPStatus.UNPROCESSABLE_CONTENT,
                 )
 
-        status_code = check_url(url.name)
+        url_info = check_url(url.name)
+        if url_info.h1:
+            url_info.h1 = url_info.h1[:200] + "..." if len(url_info.h1) > 200 else url_info.h1
+
+        if url_info.title:
+            url_info.title = url_info.title[:200] + "..." if len(url_info.title) > 200 else url_info.title
+
+        if url_info.description:
+            url_info.description = url_info.description[:200] + "..." if len(url_info.description) > 200 else url_info.description
 
         with current_app.database.transaction() as conn:
             repository = CheckRepository(conn)
             check = repository.create(
                 url_id=url_id,
-                status_code=status_code,
+                status_code=url_info.status_code,
+                h1=url_info.h1,
+                title=url_info.title,
+                description=url_info.description,
             )
 
             logger.debug("Created check: %s", check)

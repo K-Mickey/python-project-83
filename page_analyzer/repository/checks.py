@@ -22,15 +22,20 @@ class CheckRepository:
         self,
         url_id: int,
         status_code: int,
+        h1: str | None,
+        title: str | None,
+        description: str | None,
     ) -> Check:
         with self.connection.cursor(cursor_factory=NamedTupleCursor) as cur:
             cur.execute(
                 """
-                INSERT INTO url_checks (url_id, status_code)
-                VALUES (%s, %s)
+                INSERT INTO url_checks (
+                    url_id, status_code, h1, title, description
+                )
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING *
-            """
-                % (url_id, status_code)
+            """,
+               (url_id, status_code, h1, title, description)
             )
             return cur.fetchone()
 
@@ -42,7 +47,6 @@ class CheckRepository:
                 FROM url_checks
                 WHERE url_id = %s
                 ORDER BY created_at DESC
-            """
-                % url_id
+            """, (url_id,)
             )
             return cur.fetchall()
