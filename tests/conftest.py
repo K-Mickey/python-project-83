@@ -58,6 +58,7 @@ def client(connection):
     app = create_app(
         database=connection,
         config={
+            "TESTING": True,
             "WTF_CSRF_ENABLED": False,
         },
     )
