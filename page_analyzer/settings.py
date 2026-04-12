@@ -21,12 +21,4 @@ LOG_FORMAT = os.getenv(
     "> %(message)s",
 )
 
-TESTING = os.getenv("TESTING", False)
-TEST_DB_URL = os.getenv(
-    "TEST_BASE_DB_URL", "postgresql://postgres:postgres@localhost:5432/test"
-)
-TEST_ADMIN_DB = os.getenv("TEST_ADMIN_DB", "postgres")
-_parts = TEST_DB_URL.rstrip("/").split("/")
-TEST_DB_NAME = _parts[-1]
-TEST_ADMIN_DB_URL = "/".join(_parts[:-1] + [TEST_ADMIN_DB])
 MIGRATION_SCRIPT = os.getenv("MIGRATION_SCRIPT", "database.sql")

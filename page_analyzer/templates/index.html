@@ -7,7 +7,7 @@
         <div class="p-5 my-4 bg-light border rounded-3 shadow-sm">
           <h1 class="display-4 fw-normal">Анализатор страниц</h1>
           <p class="lead">Бесплатно проверяйте сайты на SEO-пригодность</p>
-          <form method="POST" action="{{ url_for('urls.create_url') }}">
+          <form method="POST" action="{{ url_for('create_url') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
               <label for="url" class="visually-hidden">URL</label>

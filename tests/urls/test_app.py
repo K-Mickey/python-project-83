@@ -11,7 +11,7 @@ def test_index_page(client):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_create_url_success(client, connection):
+def test_create_url_success(client, database):
     response = client.post(
         "/urls", data={"url": "https://example.com"}, follow_redirects=False
     )
@@ -23,7 +23,7 @@ def test_create_url_success(client, connection):
     assert 'data-test="checks"' in response_follow.text
 
     url_id = response.headers["Location"].split("/")[-1]
-    with connection.transaction() as conn:
+    with database.transaction() as conn:
         url = UrlRepository(conn).get_by_id(url_id)
 
     assert url.name == "https://example.com"
@@ -49,12 +49,12 @@ def test_create_url_duplicate(client):
     assert 'data-test="url"' in response_follow.text
 
 
-def test_get_urls_empty(client, connection):
+def test_get_urls_empty(client, database):
     response = client.get("/urls")
     assert response.status_code == HTTPStatus.OK
     assert 'data-test="urls"' in response.text
 
-    with connection.transaction() as conn:
+    with database.transaction() as conn:
         urls = UrlRepository(conn).get_all_with_last_checks()
     assert len(urls) == 0
 
@@ -84,7 +84,7 @@ def test_create_check_nonexistent_url(client):
     assert "Страница не найдена" in follow_response.text
 
 
-def test_create_check_success(client, mocker, connection):
+def test_create_check_success(client, mocker, database):
     post_resp = client.post("/urls", data={"url": "https://check-success.com"})
     location = post_resp.headers["Location"]
     url_id = location.split("/")[-1]
@@ -107,7 +107,7 @@ def test_create_check_success(client, mocker, connection):
     assert "Unique title" in follow_response.text
     assert "Great header" in follow_response.text
 
-    with connection.transaction() as conn:
+    with database.transaction() as conn:
         checks = CheckRepository(conn).get_checks_by_url(int(url_id))
 
     assert len(checks) == 1
@@ -119,7 +119,7 @@ def test_create_check_success(client, mocker, connection):
     assert check.description is None
 
 
-def test_create_check_network_error(client, mocker, connection):
+def test_create_check_network_error(client, mocker, database):
     post_resp = client.post("/urls", data={"url": "https://unreachable.com"})
     url_id = post_resp.headers["Location"].split("/")[-1]
 
@@ -134,6 +134,6 @@ def test_create_check_network_error(client, mocker, connection):
     follow_response = client.get(response.headers["Location"])
     assert "Произошла ошибка при проверке" in follow_response.text
 
-    with connection.transaction() as conn:
+    with database.transaction() as conn:
         checks = CheckRepository(conn).get_checks_by_url(int(url_id))
     assert len(checks) == 0

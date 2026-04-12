@@ -23,7 +23,7 @@
     
     <div class="mt-5 mb-3">
       <h2>Проверки</h2>
-      <form method="POST" action="{{ url_for('urls.create_check', url_id=url.id) }}" class="mt-4">
+      <form method="POST" action="{{ url_for('create_check', url_id=url.id) }}" class="mt-4">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-primary">Запустить проверку</button>
       </form>

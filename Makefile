@@ -25,10 +25,10 @@ migrate:
 	@echo "Database migrated"
 
 test:
-	uv run pytest
+	DATABASE_URL=${TEST_BASE_DB_URL} uv run pytest
 
 test-coverage:
-	uv run pytest --cov=page_analyzer --cov-report xml
+	DATABASE_URL=${TEST_BASE_DB_URL} uv run pytest --cov=page_analyzer --cov-report xml
 
 check: test lint
 

@@ -1,71 +1,59 @@
+from urllib.parse import urlparse
+
 import psycopg2
 import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from page_analyzer import create_app, settings
+from page_analyzer import app
 from page_analyzer.repository import Database
 from page_analyzer.settings import (
-    DATABASE_MAX_CONN,
-    DATABASE_MIN_CONN,
+    DATABASE_URL,
     MIGRATION_SCRIPT,
-    TEST_ADMIN_DB_URL,
-    TEST_DB_NAME,
-    TEST_DB_URL,
 )
 
-settings.TESTING = True
+_parsed = urlparse(DATABASE_URL)
+ADMIN_DB = "postgres"
+ADMIN_DB_URL = _parsed._replace(path=f"/{ADMIN_DB}").geturl()
+DB_NAME = _parsed.path[1:]
 
 
 @pytest.fixture(scope="session")
-def database():
+def init_database():
     create_test_database(
-        admin_dsn=TEST_ADMIN_DB_URL,
-        test_dbname=TEST_DB_NAME,
+        admin_dsn=ADMIN_DB_URL,
+        test_dbname=DB_NAME,
     )
 
     create_tables(
-        dsn=TEST_DB_URL,
+        dsn=DATABASE_URL,
         migration_script=MIGRATION_SCRIPT,
     )
 
     yield
 
     remove_test_database(
-        admin_dsn=TEST_ADMIN_DB_URL,
-        test_dbname=TEST_DB_NAME,
+        admin_dsn=ADMIN_DB_URL,
+        test_dbname=DB_NAME,
     )
 
 
 @pytest.fixture
-def connection(database):
-    dsn = TEST_DB_URL
-    db = Database(
-        minconn=DATABASE_MIN_CONN,
-        maxconn=DATABASE_MAX_CONN,
-        dsn=dsn,
-    )
+def database():
+    yield Database(DATABASE_URL)
 
-    yield db
 
-    db.close_all()
+@pytest.fixture
+def client(init_database):
+    app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
 
-    with psycopg2.connect(dsn) as conn:
+    with app.test_client() as client:
+        yield client
+
+    with psycopg2.connect(DATABASE_URL) as conn:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         with conn.cursor() as cur:
             cur.execute("TRUNCATE urls CASCADE;")
-
-
-@pytest.fixture
-def client(connection):
-    app = create_app(
-        database=connection,
-        config={
-            "TESTING": True,
-            "WTF_CSRF_ENABLED": False,
-        },
-    )
-    with app.test_client() as client:
-        yield client
 
 
 def create_test_database(

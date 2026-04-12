@@ -51,15 +51,12 @@ SECRET_KEY = "your_secret_key"
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/page_analyzer"
 
 # optional
-DATABASE_MIN_CONN = 1
-DATABASE_MAX_CONN = 10
 LOG_LEVEL = "INFO"
 LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
 # test
-TEST_DB_URL = "postgresql://postgres:postgres@localhost:5432/test"
+TEST_BASE_DB_URL = "postgresql://postgres:postgres@localhost:5432/test_page_analyzer"
 MIGRATION_SCRIPT = "database.sql"
-
 ```
 
 ## Usage
