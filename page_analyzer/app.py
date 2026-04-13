@@ -42,6 +42,7 @@ def create_url():
 
     if errors := validate(raw_url):
         logger.debug("Validation errors: %s", errors)
+        flash("Некорректный URL", FlashCategory.DANGER)
         return render_template(
             "index.html",
             url=raw_url,
