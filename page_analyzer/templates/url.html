@@ -29,7 +29,7 @@
       </form>
       
       <table class="table table-bordered my-3" data-test="checks">
-        <tbody>
+        <thead>
           <tr>
             <th scope="col" class="fw-normal">ID</th>
             <th scope="col" class="fw-normal">Код ответа</th>
@@ -38,7 +38,8 @@
             <th scope="col" class="fw-normal">description</th>
             <th scope="col" class="fw-normal">Дата создания</th>
           </tr>
-        
+        </thead>
+        <tbody>
           {% for check in checks %}
             <tr>
               <td scope="row">{{ check.id }}</td>
@@ -49,7 +50,6 @@
               <td>{{ check.created_at.strftime("%Y-%m-%d") }}</td>
             </tr>
           {% endfor %}
-        
         </tbody>
       </table>
     </div>

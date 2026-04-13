@@ -55,7 +55,6 @@ LOG_LEVEL = "INFO"
 LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
 # test
-TEST_BASE_DB_URL = "postgresql://postgres:postgres@localhost:5432/test_page_analyzer"
 MIGRATION_SCRIPT = "database.sql"
 ```
 
